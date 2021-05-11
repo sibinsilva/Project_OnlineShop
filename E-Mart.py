@@ -111,20 +111,22 @@ def SaveItem(dbconnect, ProductGroup, URL):
                 'span', class_='details-product-price__value ec-price-item notranslate').text.strip()
             ProductDescription = item.find(
                 'div', class_='product-details__product-description').text.strip()
-            print(ProductName)
-        picture = None
-        ImageDiv = soup.find_all(
-            'div', class_='details-gallery__image-wrapper')
-        for link in ImageDiv:
-            ImageURL = link.find_all('img', src=True)
-            image_title = [x['title'] for x in ImageURL]
-            image_src = [x['src'] for x in ImageURL]
-            response = requests.get(image_src[0])  # url is definitely correct
-            picture = sqlite3.Binary(response.content)
-        productcursor.execute(
-            """INSERT OR IGNORE INTO Products(ProductName,ProductGroup,ProductSKU,ProductPrice,ProductDescription,Picture,CreationDate) values(?,?,?,?,?,?,?)""", (ProductName, ProductGroup, ProductSKU, ProductPrice, ProductDescription, picture, datetime.now()))
-        dbconnect.commit()
-        productcursor.close()
+            if str(ProductName) != '':
+                print(ProductName)
+            picture = None
+            ImageDiv = soup.find_all(
+                'div', class_='details-gallery__image-wrapper')
+            for link in ImageDiv:
+                ImageURL = link.find_all('img', src=True)
+                image_title = [x['title'] for x in ImageURL]
+                image_src = [x['src'] for x in ImageURL]
+                # url is definitely correct
+                response = requests.get(image_src[0])
+                picture = sqlite3.Binary(response.content)
+            productcursor.execute(
+                """INSERT OR IGNORE INTO Products(ProductName,ProductGroup,ProductSKU,ProductPrice,ProductDescription,Picture,CreationDate) values(?,?,?,?,?,?,?)""", (ProductName, ProductGroup, ProductSKU, ProductPrice, ProductDescription, picture, datetime.now()))
+            dbconnect.commit()
+            productcursor.close()
     except:
         pass
     #SavingImages(image_title, image_src, Filepath)
